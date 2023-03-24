@@ -1,0 +1,97 @@
+# Click the Variables button, above, to create your own variables.
+GET pubmed-paper-index/_count
+GET pubmed-paper-index/_search
+
+//search based on pubmedId
+GET pubmed-paper-index/_search
+{
+  "query": {
+    "match": {
+      "_id": "36474876"
+    }
+  }
+}
+
+//author with multiple publications
+GET pubmed-paper-index/_search
+{
+  "query": {
+    "match": {
+      "authors.last_name": "Genov"
+    }
+  }
+}
+
+//Author with affiliation
+GET pubmed-paper-index/_search
+{
+  "query": {
+    "match": {
+      "authors.first_name": "Yun Kwok"
+    }
+  }
+}
+
+//Multiple authors
+GET pubmed-paper-index/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"authors.first_name": "Yun Kwok"}},
+        {"match": {"authors.first_name": "Marcella"}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+//search based on meshId
+GET pubmed-paper-index/_search
+{
+  "query": {
+    "match": {
+      "mesh_annotations.mesh_id": "D008297"
+    }
+  }
+}
+
+//getting all distinct descriptor for mesh names
+GET pubmed-paper-index/_search
+{
+  "size": 0,
+  "aggs": {
+    "distinct_descriptor_names": {
+      "terms": {
+        "field": "mesh_annotations.descriptor_name.keyword",
+        "size": 10000
+      }
+    }
+  }
+}
+
+//Getting the minimum created_date
+GET pubmed-paper-index/_search
+{
+  "size": 0,
+  "aggs": {
+    "min_created_date": {
+      "min": {
+        "field": "created_date"
+      }
+    }
+  }
+}
+
+//Getting the maximum created_date
+GET pubmed-paper-index/_search
+{
+  "size": 0,
+  "aggs": {
+    "max_created_date": {
+      "max": {
+        "field": "created_date"
+      }
+    }
+  }
+}

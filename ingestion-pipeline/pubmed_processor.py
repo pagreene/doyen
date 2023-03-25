@@ -1,10 +1,5 @@
 import logging
-import os
-import gzip
 from datetime import datetime
-import time
-import xml.etree.cElementTree as ET  # C implementation of ElementTree
-import traceback
 import json
 import configparser
 from typing import List

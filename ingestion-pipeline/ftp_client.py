@@ -5,6 +5,7 @@ from io import BytesIO
 from pathlib import Path
 from contextlib import contextmanager
 import xml.etree.ElementTree as ET
+from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -31,13 +32,13 @@ class NihFtpClient(object):
 
     ftp_url = "ftp.ncbi.nlm.nih.gov"
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path | str):
         if not isinstance(root, Path):
             root = Path(root)
         self.root = root
         return
 
-    def get_xml_file(self, file_name):
+    def get_xml_tree(self, file_name):
         """Get the content from an xml file as an ElementTree."""
         logger.info(f"Downloading {file_name}")
         xml_bytes = self.get_file(file_name, force_str=False, decompress=True)
@@ -83,7 +84,9 @@ class NihFtpClient(object):
 
         return ret
 
-    def list(self, dir_path: Path = None, with_timestamps=True):
+    def list(
+        self, dir_path: Path | str = None, with_timestamps=True
+    ) -> List[Tuple[str, int]]:
         """List all contents the ftp directory."""
         if dir_path is None:
             dir_path = self.root

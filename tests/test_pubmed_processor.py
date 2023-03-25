@@ -26,7 +26,7 @@ class TestPubMedProcessor(unittest.TestCase):
         self.pubmedProcessor = PubmedProcessor()
 
     def test_download_and_convert_to_xml_files(self):
-        """Covers the test for download_and_convert_to_xml_files() function
+        """Covers the tests for download_and_convert_to_xml_files() function
         Download the specific number of gz files and convert them to xml.
         Files from the ftp folder will be ordered in descending order first before downloading the specific number
         """
@@ -102,7 +102,7 @@ class TestPubMedProcessor(unittest.TestCase):
         """Indexes all the gz files available in the provided pubmed_folder"""
         pubmed_folder = self.config_dict["elasticsearch"][
             "local_dir"
-        ]  #'/Users/muhammadayub/Documents/PubmedData/test'
+        ]  #'/Users/muhammadayub/Documents/PubmedData/tests'
         files_to_index = get_all_gz_files(pubmed_folder)
         # Following code is to process and index all the gz files in the pubmed_folder
         files_indexed = index_all_pubmed_files(pubmed_folder)

@@ -1,0 +1,76 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "properties": {
+      "pmid": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "standard"
+      },
+      "abstract": {
+        "type": "string",
+        "analyzer": "standard"
+      },
+      "publication_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+      },
+      "authors": {
+        "properties": {
+          "last_name": {
+            "type": "text"
+          },
+          "first_name": {
+            "type": "text"
+          },
+          "identifiers": {
+            "type": "text"
+          },
+          "affiliations": {
+            "properties": {
+              "affiliation": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "mesh_annotations": {
+        "properties": {
+          "mesh": {
+            "type": "text"
+          },
+          "text": {
+            "type": "text"
+          },
+          "major_topic": {
+            "type": "boolean"
+          },
+          "qualifiers": {
+            "type": "nested",
+            "properties": {
+              "mesh": {
+                "type": "text"
+              },
+              "text": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "references": {
+        "properties": {
+          "article_id": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+}

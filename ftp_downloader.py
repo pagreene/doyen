@@ -102,7 +102,7 @@ class FtpDownloader:
         downloaded_files = self.download_files(numberOfFiles)
         download_dir = (
             self.download_dir
-        )  #'/Users/muhammadayub/Documents/PubmedData/test'
+        )  #'/Users/muhammadayub/Documents/PubmedData/tests'
 
         # convert the downloaded files to XML format and delete the gz files
         for filename in downloaded_files:
@@ -155,7 +155,7 @@ class FtpDownloader:
 
         download_dir = (
             self.download_dir
-        )  # /Users/muhammadayub/Documents/PubmedData/test'
+        )  # /Users/muhammadayub/Documents/PubmedData/tests'
 
         if not os.path.exists(download_dir):
             os.makedirs(download_dir)

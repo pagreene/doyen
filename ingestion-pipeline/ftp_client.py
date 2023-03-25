@@ -28,7 +28,8 @@ class NihFtpClient(object):
     root : Path
         The path to the subdirectory around which this client operates.
     """
-    ftp_url = 'ftp.ncbi.nlm.nih.gov'
+
+    ftp_url = "ftp.ncbi.nlm.nih.gov"
 
     def __init__(self, root: Path):
         if not isinstance(root, Path):
@@ -46,15 +47,17 @@ class NihFtpClient(object):
     def download_file(self, file_path: str | Path, dest_file: Path = None):
         """Download a file into a file given by file_path."""
         if not dest_file:
-            dest_file = Path('.') / file_path.name
+            dest_file = Path(".") / file_path.name
 
         full_path = self.root / file_path
         logger.info(full_path)
-        with dest_file.open('wb') as gzf:
+        with dest_file.open("wb") as gzf:
             with ftp_connection(self.ftp_url) as ftp:
-                ftp.retrbinary(f"RETR {full_path}",
-                               callback=lambda s: gzf.write(s),
-                               blocksize=FTP_BLOCK_SIZE)
+                ftp.retrbinary(
+                    f"RETR {full_path}",
+                    callback=lambda s: gzf.write(s),
+                    blocksize=FTP_BLOCK_SIZE,
+                )
                 gzf.flush()
         return
 
@@ -64,21 +67,23 @@ class NihFtpClient(object):
         full_path = self.root / file_path
         gzf_bytes = BytesIO()
         with ftp_connection(self.ftp_url) as ftp:
-            ftp.retrbinary(f"RETR {full_path}",
-                           callback=lambda s: gzf_bytes.write(s),
-                           blocksize=FTP_BLOCK_SIZE)
+            ftp.retrbinary(
+                f"RETR {full_path}",
+                callback=lambda s: gzf_bytes.write(s),
+                blocksize=FTP_BLOCK_SIZE,
+            )
             gzf_bytes.flush()
         ret = gzf_bytes.getvalue()
 
-        if file_path.endswith('.gz') and decompress:
-            ret = zlib.decompress(ret, 16+zlib.MAX_WBITS)
+        if file_path.endswith(".gz") and decompress:
+            ret = zlib.decompress(ret, 16 + zlib.MAX_WBITS)
 
         if force_str and isinstance(ret, bytes):
-            ret = ret.decode('utf8')
+            ret = ret.decode("utf8")
 
         return ret
 
-    def list(self, dir_path: Path=None, with_timestamps=True):
+    def list(self, dir_path: Path = None, with_timestamps=True):
         """List all contents the ftp directory."""
         if dir_path is None:
             dir_path = self.root
@@ -88,8 +93,11 @@ class NihFtpClient(object):
         with ftp_connection(self.ftp_url) as ftp:
             if with_timestamps:
                 raw_contents = ftp.mlsd(str(dir_path))
-                contents = [(k, meta['modify']) for k, meta in raw_contents
-                            if not k.startswith('.')]
+                contents = [
+                    (k, meta["modify"])
+                    for k, meta in raw_contents
+                    if not k.startswith(".")
+                ]
             else:
                 contents = ftp.nlst()
         return contents

@@ -56,3 +56,6 @@ You should then be able to simply run the pubmed processor:
 python pubmed_parsor.py 
 ```
 The index will be created, and the content uploaded.
+
+Note that you will need to change the password, and update
+the `http_ca.crt` file every time to start up ElasticSearch.

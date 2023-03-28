@@ -4,6 +4,7 @@ import json
 import configparser
 from typing import List
 
+import click
 from elasticsearch import Elasticsearch, helpers
 from indra.literature.pubmed_client import get_metadata_from_xml_tree
 
@@ -12,7 +13,7 @@ from ftp_client import NihFtpClient
 logging.basicConfig(
     level=logging.INFO, format=f"[%(asctime)s] %(name)s %(levelname)s - %(message)s"
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("doyen_pubmed_upload")
 
 
 config = configparser.ConfigParser()
@@ -117,15 +118,44 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     )
 
 
-def main():
+@click.command()
+@click.option(
+    "--start",
+    "-s",
+    default=None,
+    help="The index in the list of baselines from which to start. The value "
+    "can be either positive, or negative to measure from the end of the list.",
+    type=int,
+)
+@click.option(
+    "--end",
+    "-e",
+    default=None,
+    help="The index in the list of baseline files at which to end. The value "
+    "can be either positive, or negative to measure from teh end of the list.",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Optionally quiet the logs to only show warnings.",
+)
+def fill_elasticsearch(start: int | None, end: int | None, quiet: bool):
+    # Set the log level.
+    if quiet:
+        logging.basicConfig(level=logging.WARNING)
+
+    # Get the list of baseline files
     client = NihFtpClient("pubmed")
     baseline_files = client.list("baseline")
-    baseline_gz_files = [fname for fname, _ in baseline_files if fname.endswith(".gz")]
+    baseline_gz_files = sorted(
+        fname for fname, _ in baseline_files if fname.endswith(".gz")
+    )
 
     # We are currently just playing with the 100 files at the end of the list.
     file_paths = [f"baseline/{fname}" for fname in baseline_gz_files]
-    return index_pubmed_files(file_paths[-100:])
+    return index_pubmed_files(file_paths[start:end])
 
 
 if __name__ == "__main__":
-    main()
+    fill_elasticsearch()

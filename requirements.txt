@@ -1,1 +1,5 @@
 elasticsearch==8.6.2
+git+https://github.com/sorgerlab/indra
+click
+black
+pytest

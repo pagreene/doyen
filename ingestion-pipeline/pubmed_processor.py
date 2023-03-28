@@ -45,24 +45,6 @@ def create_pubmed_paper_index():
     return
 
 
-def get_elasticsearch_doc(paper):
-    """Creates elastic search document object based on pubmed schema for indexing"""
-    doc = {
-        "_index": index_name,
-        "_id": paper.pm_id,
-        "_source": {
-            "pmid": paper.pm_id,
-            "title": paper.title,
-            "abstract": paper.abstract,
-            "eated_date": paper.created_datetime,
-            "authors": paper.authors,
-            "mesh_annotations": paper.mesh_annotations,
-            "references": paper.references,
-        },
-    }
-    return doc
-
-
 def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     """Indexes all the gz files in the provided list_of_files parameter"""
     if refresh_index:
@@ -78,6 +60,7 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
         logger.info(f"Processing file {i} of {len(file_paths)}: {file_path}")
         start = datetime.now()
 
+        # Parse the XML
         xml_tree = client.get_xml_tree(file_path)
         articles_by_pmid = get_metadata_from_xml_tree(
             xml_tree, get_abstracts=True, mesh_annotations=True, detailed_authors=True
@@ -88,6 +71,13 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
             if article["publication_date"]["year"] > 2017
         ]
         xml_tree.clear()
+
+        # Update the date format.
+        for article in recent_articles:
+            pub_date = article["publication_date"]
+            article["publication_date"] = datetime(
+                year=pub_date["year"], month=pub_date["month"], day=pub_date["day"]
+            ).strftime("%Y-%m-%d")
 
         # Make sure we didn't filter out all the articles.
         if not recent_articles:

@@ -53,9 +53,9 @@ password and the location of the certificate file.
 
 You should then be able to simply run the pubmed processor:
 ```bash
-python pubmed_parsor.py 
+python pubmed_processor.py --start -100 
 ```
-The index will be created, and the content uploaded.
+The index will be created, and the content uploaded. You can check the options on the processor using `--help`.
 
 Note that you will need to change the password, and update
 the `http_ca.crt` file every time to start up ElasticSearch.

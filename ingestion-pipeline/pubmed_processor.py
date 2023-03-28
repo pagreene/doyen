@@ -133,6 +133,7 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     default=None,
     help="The index in the list of baseline files at which to end. The value "
     "can be either positive, or negative to measure from teh end of the list.",
+    type=int,
 )
 @click.option(
     "--quiet",

@@ -3,12 +3,17 @@ from datetime import datetime
 import json
 import configparser
 from typing import List
+from pathlib import Path
 
 import click
 from elasticsearch import Elasticsearch, helpers
 from indra.literature.pubmed_client import get_metadata_from_xml_tree
 
-from ftp_client import NihFtpClient
+from .ftp_client import NihFtpClient
+
+HERE = Path(__file__).parent.absolute()
+CONFIG_FILE = HERE / "config.ini"
+ES_INDEX_CONFIG = HERE / "elastic-search-config.json"
 
 logging.basicConfig(
     level=logging.INFO, format=f"[%(asctime)s] %(name)s %(levelname)s - %(message)s"
@@ -16,26 +21,29 @@ logging.basicConfig(
 logger = logging.getLogger("doyen_pubmed_upload")
 
 
-config = configparser.ConfigParser()
-config.read("config.ini")
+CONFIG = configparser.ConfigParser()
+CONFIG.read(CONFIG_FILE)
 
-es = Elasticsearch(
-    config.get("elasticsearch", "host"),
-    ca_certs=config.get("elasticsearch", "ca_certs"),
-    basic_auth=(
-        config.get("elasticsearch", "username"),
-        config.get("elasticsearch", "password"),
-    ),
-)
-index_name = config.get("index", "name")
-type_name = config.get("index", "type")
+
+def get_es_client():
+    return Elasticsearch(
+        CONFIG.get("elasticsearch", "host"),
+        ca_certs=CONFIG.get("elasticsearch", "ca_certs"),
+        basic_auth=(
+            CONFIG.get("elasticsearch", "username"),
+            CONFIG.get("elasticsearch", "password"),
+        ),
+    )
 
 
 def create_pubmed_paper_index():
-    with open("elastic-search-config.json", "r") as file_handle:
+    es = get_es_client()
+
+    with ES_INDEX_CONFIG.open() as file_handle:
         es_config = json.load(file_handle)
 
     # We need to delete the index first before building a new
+    index_name = CONFIG.get("index", "name")
     if es.indices.exists(index=index_name):
         es.indices.delete(index=index_name)
 
@@ -88,9 +96,13 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
         # Try to upload all these articles into ElasticSearch
         logger.info(f"Starting to index {len(recent_articles)} articles...")
         start_index = datetime.now()
+        es = get_es_client()
         try:
             for is_ok, response in helpers.streaming_bulk(
-                es, recent_articles, index=index_name, raise_on_error=True
+                es,
+                recent_articles,
+                index=CONFIG.get("index", "name"),
+                raise_on_error=True,
             ):
                 if not is_ok:
                     # If the indexing is not successful, log the error

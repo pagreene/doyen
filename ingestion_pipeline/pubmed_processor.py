@@ -4,6 +4,7 @@ import json
 import configparser
 from typing import List
 from pathlib import Path
+import shutil
 
 import click
 from elasticsearch import Elasticsearch, helpers
@@ -11,21 +12,37 @@ from indra.literature.pubmed_client import get_metadata_from_xml_tree
 
 from .ftp_client import NihFtpClient
 
+# Define file paths relative to this location.
 HERE = Path(__file__).parent.absolute()
-CONFIG_FILE = HERE / "config.ini"
-ES_INDEX_CONFIG = HERE / "elastic-search-config.json"
+CONFIG_FILE = HERE / "resources" / "config.ini"
+CONFIG_TEMPLATE = HERE / "resources" / "config_template.ini"
+ES_INDEX_CONFIG = HERE / "resources" / "elastic-search-config.json"
 
+# Create a logger with nice time stamps.
 logging.basicConfig(
     level=logging.INFO, format=f"[%(asctime)s] %(name)s %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("doyen_pubmed_upload")
 
 
+# Make sure the user fills out the config file.
+if not CONFIG_FILE.exists():
+    logger.warning(f"No config file found. It should be at {CONFIG_FILE}.")
+    shutil.copy(CONFIG_TEMPLATE, CONFIG_FILE)
+    logger.warning(
+        "Created a new config file from a template. Please "
+        "update the config with current values."
+    )
+    input("After you update the values, press any key to continue..")
+
+
+# Load the config.
 CONFIG = configparser.ConfigParser()
 CONFIG.read(CONFIG_FILE)
 
 
 def get_es_client():
+    """Get an instance of the elasticsearch client."""
     return Elasticsearch(
         CONFIG.get("elasticsearch", "host"),
         ca_certs=CONFIG.get("elasticsearch", "ca_certs"),
@@ -37,6 +54,7 @@ def get_es_client():
 
 
 def create_pubmed_paper_index():
+    """Create the pubmed paper index in elasticsearch."""
     es = get_es_client()
 
     with ES_INDEX_CONFIG.open() as file_handle:

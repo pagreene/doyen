@@ -14,7 +14,7 @@ class TestPubMedProcessor(unittest.TestCase):
     def setUp(self):
         # Load config file
         config = configparser.ConfigParser()
-        config.read("config.ini")
+        config.read("config_template.ini")
         self.config_dict = {
             section: dict(config.items(section)) for section in config.sections()
         }

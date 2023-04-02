@@ -10,7 +10,7 @@ import click
 from elasticsearch import Elasticsearch, helpers, BadRequestError
 from indra.literature.pubmed_client import get_metadata_from_xml_tree
 
-from .ftp_client import NihFtpClient
+from ftp_client import NihFtpClient
 
 # Define file paths relative to this location.
 HERE = Path(__file__).parent.absolute()

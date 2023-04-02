@@ -13,7 +13,7 @@
         "analyzer": "standard"
       },
       "abstract": {
-        "type": "string",
+        "type": "text",
         "analyzer": "standard"
       },
       "publication_date": {

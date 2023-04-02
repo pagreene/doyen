@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 
 import click
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch, helpers, BadRequestError
 from indra.literature.pubmed_client import get_metadata_from_xml_tree
 
 from .ftp_client import NihFtpClient
@@ -63,13 +63,18 @@ def create_pubmed_paper_index():
     # We need to delete the index first before building a new
     index_name = CONFIG.get("index", "name")
     if es.indices.exists(index=index_name):
+        logger.info("Deleting the pre-existing index.")
         es.indices.delete(index=index_name)
 
     # Build the index.
-    es.indices.create(
-        index=index_name, ignore=400, body={"mappings": es_config["mappings"]}
-    )
-    return
+    try:
+        es.indices.create(index=index_name, body={"mappings": es_config["mappings"]})
+    except BadRequestError as err:
+        logger.error("Failed to create the index.")
+        logger.exception(err)
+        return False
+
+    return True
 
 
 def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):

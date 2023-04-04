@@ -2,16 +2,6 @@
 GET pubmed-paper-index/_count
 GET pubmed-paper-index/_search
 
-//search based on pubmedId
-GET pubmed-paper-index/_search
-{
-  "query": {
-    "match": {
-      "_id": "36474876"
-    }
-  }
-}
-
 //author with multiple publications
 GET pubmed-paper-index/_search
 {
@@ -51,7 +41,7 @@ GET pubmed-paper-index/_search
 {
   "query": {
     "match": {
-      "mesh_annotations.mesh_id": "D008297"
+      "mesh_annotations.mesh": "D008297"
     }
   }
 }
@@ -63,7 +53,7 @@ GET pubmed-paper-index/_search
   "aggs": {
     "distinct_descriptor_names": {
       "terms": {
-        "field": "mesh_annotations.descriptor_name.keyword",
+        "field": "mesh_annotations.text",
         "size": 10000
       }
     }
@@ -77,7 +67,7 @@ GET pubmed-paper-index/_search
   "aggs": {
     "min_created_date": {
       "min": {
-        "field": "created_date"
+        "field": "publication_date"
       }
     }
   }
@@ -90,8 +80,23 @@ GET pubmed-paper-index/_search
   "aggs": {
     "max_created_date": {
       "max": {
-        "field": "created_date"
+        "field": "publication_date"
       }
     }
   }
+}
+
+// Search by multiple criteria
+GET pubmed-paper-index/_search
+{
+    "query": {
+        "bool": {
+            "should": [
+                {"match": {"abstract": "classifying"}},
+                {"match": {"abstract": "audio"}},
+                {"match": {"mesh_annotations.mesh": "D003371"}},  // Cough
+                {"match": {"mesh_annotations.mesh": "D000086382"}}  // Covid
+            ]
+        }
+    }
 }

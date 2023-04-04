@@ -55,7 +55,7 @@ class NihFtpClient(object):
         with dest_file.open("wb") as gzf:
             with ftp_connection(self.ftp_url) as ftp:
                 ftp.retrbinary(
-                    f"RETR {full_path}",
+                    f"RETR {full_path.as_posix()}",
                     callback=lambda s: gzf.write(s),
                     blocksize=FTP_BLOCK_SIZE,
                 )
@@ -69,7 +69,7 @@ class NihFtpClient(object):
         gzf_bytes = BytesIO()
         with ftp_connection(self.ftp_url) as ftp:
             ftp.retrbinary(
-                f"RETR {full_path}",
+                f"RETR {full_path.as_posix()}",
                 callback=lambda s: gzf_bytes.write(s),
                 blocksize=FTP_BLOCK_SIZE,
             )
@@ -95,7 +95,7 @@ class NihFtpClient(object):
 
         with ftp_connection(self.ftp_url) as ftp:
             if with_timestamps:
-                raw_contents = ftp.mlsd(str(dir_path))
+                raw_contents = ftp.mlsd(dir_path.as_posix())
                 contents = [
                     (k, meta["modify"])
                     for k, meta in raw_contents

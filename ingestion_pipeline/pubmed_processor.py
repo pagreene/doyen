@@ -79,18 +79,21 @@ def create_pubmed_paper_index():
 
 def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     """Indexes all the gz files in the provided list_of_files parameter"""
+    start = datetime.now()
+
     if refresh_index:
         logger.info("Rebuilding the index...")
         create_pubmed_paper_index()
 
     client = NihFtpClient("pubmed")
-
+    es = get_es_client()
+    
     # Loop over all files, extract the information and index in bulk
     files_indexed = 0
     articles_added = 0
     for i, file_path in enumerate(file_paths):
         logger.info(f"Processing file {i} of {len(file_paths)}: {file_path}")
-        start = datetime.now()
+        start_file = datetime.now()
 
         # Parse the XML
         xml_tree = client.get_xml_tree(file_path)
@@ -118,14 +121,14 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
 
         # Try to upload all these articles into ElasticSearch
         logger.info(f"Starting to index {len(recent_articles)} articles...")
-        start_index = datetime.now()
-        es = get_es_client()
+        start_index = datetime.now()        
         try:
             for is_ok, response in helpers.streaming_bulk(
                 es,
                 recent_articles,
                 index=CONFIG.get("index", "name"),
                 raise_on_error=True,
+                timeout=CONFIG.get("elasticsearch", "timeout")
             ):
                 if not is_ok:
                     # If the indexing is not successful, log the error
@@ -138,18 +141,19 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
             logger.exception(err)
             continue
 
-        total_time_taken = datetime.now() - start
-        indexing_time_take = datetime.now() - start_index
+        total_time_taken_per_file = datetime.now() - start_file
+        indexing_time_taken_per_file = datetime.now() - start_index
         logger.info(
             f"Completed file {i} of {len(file_paths)}, {file_path}, "
-            f"in {total_time_taken} total, and {indexing_time_take}"
+            f"in {total_time_taken_per_file} total, and {indexing_time_taken_per_file}"
         )
 
         files_indexed += 1
         articles_added += len(recent_articles)
-
+    
+    total_time_taken = datetime.now() - start
     logger.info(
-        f"Successfully index {files_indexed} files, adding {articles_added} articles."
+        f"Successfully index {files_indexed} files, adding {articles_added} articles in {total_time_taken}."
     )
 
 

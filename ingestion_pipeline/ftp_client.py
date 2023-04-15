@@ -5,7 +5,7 @@ from io import BytesIO
 from pathlib import Path
 from contextlib import contextmanager
 import xml.etree.ElementTree as ET
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +32,7 @@ class NihFtpClient(object):
 
     ftp_url = "ftp.ncbi.nlm.nih.gov"
 
-    def __init__(self, root: Path | str):
+    def __init__(self, root: Union[Path, str]):
         if not isinstance(root, Path):
             root = Path(root)
         self.root = root
@@ -45,7 +45,7 @@ class NihFtpClient(object):
         logger.info("Parsing XML metadata")
         return ET.XML(xml_bytes)
 
-    def download_file(self, file_path: str | Path, dest_file: Path = None):
+    def download_file(self, file_path: Union[Path, str], dest_file: Path = None):
         """Download a file into a file given by file_path."""
         if not dest_file:
             dest_file = Path(".") / file_path.name
@@ -62,7 +62,7 @@ class NihFtpClient(object):
                 gzf.flush()
         return
 
-    def get_file(self, file_path: str | Path, force_str=True, decompress=True):
+    def get_file(self, file_path: Union[Path, str], force_str=True, decompress=True):
         """Get the contents of a file as a string."""
 
         full_path = self.root / file_path
@@ -85,7 +85,7 @@ class NihFtpClient(object):
         return ret
 
     def list(
-        self, dir_path: Path | str = None, with_timestamps=True
+        self, dir_path: Union[Path, str] = None, with_timestamps=True
     ) -> List[Tuple[str, int]]:
         """List all contents the ftp directory."""
         if dir_path is None:

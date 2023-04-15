@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 import json
 import configparser
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 import shutil
 
@@ -180,7 +180,7 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     is_flag=True,
     help="Optionally quiet the logs to only show warnings.",
 )
-def fill_elasticsearch(start: int | None, end: int | None, quiet: bool):
+def fill_elasticsearch(start: Optional[int], end: Optional[int], quiet: bool):
     # Set the log level.
     if quiet:
         logging.basicConfig(level=logging.WARNING)

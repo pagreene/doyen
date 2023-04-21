@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="doyen_ingestion",
@@ -8,10 +8,11 @@ setup(
     entry_points={"console_scripts": ["doyen-ingest = doyen.pubmed_processor:main"]},
     python_requires=">=3.9",
     install_requires=[
+        "click",
         "elasticsearch",
         "indra @ https://github.com/pagreene/indra/archive/get-citations.zip",
     ],
-    extras_require={"dev": ["pytest", "black"]},
+    extras_require={"dev": ["pytest", "black", "pytest-mock"]},
     classifiers=[
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3 :: Only",

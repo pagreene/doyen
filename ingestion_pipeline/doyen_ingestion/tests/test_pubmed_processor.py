@@ -1,14 +1,11 @@
-import gzip
 from io import BytesIO
 
-import elasticsearch
-from click.testing import CliRunner
-
 import pytest
+from click.testing import CliRunner
 from elasticsearch import Elasticsearch
 from pytest_mock import MockFixture
 
-from doyen_ingestion.pubmed_processor import fill_elasticsearch, CONFIG
+from doyen_ingestion.pubmed_processor import CONFIG, fill_elasticsearch
 
 
 @pytest.fixture

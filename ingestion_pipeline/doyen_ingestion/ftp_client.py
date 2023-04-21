@@ -1,10 +1,10 @@
-import logging
-import zlib
 import ftplib
+import logging
+import xml.etree.ElementTree as ET
+import zlib
+from contextlib import contextmanager
 from io import BytesIO
 from pathlib import Path
-from contextlib import contextmanager
-import xml.etree.ElementTree as ET
 from typing import List, Tuple, Union
 
 logger = logging.getLogger(__name__)

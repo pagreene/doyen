@@ -1,10 +1,10 @@
-import logging
-from datetime import datetime
-import json
 import configparser
-from typing import List, Optional
-from pathlib import Path
+import json
+import logging
 import shutil
+from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
 
 import click
 import elasticsearch

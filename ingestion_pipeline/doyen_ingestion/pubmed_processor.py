@@ -87,7 +87,7 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
 
     client = NihFtpClient("pubmed")
     es = get_es_client()
-    
+
     # Loop over all files, extract the information and index in bulk
     files_indexed = 0
     articles_added = 0
@@ -98,7 +98,12 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
         # Parse the XML
         xml_tree = client.get_xml_tree(file_path)
         articles_by_pmid = get_metadata_from_xml_tree(
-            xml_tree, get_abstracts=True, mesh_annotations=True, detailed_authors=True
+            xml_tree,
+            get_abstracts=True,
+            mesh_annotations=True,
+            prepend_title=True,
+            detailed_authors=True,
+            references_included="pmid",
         )
         recent_articles = [
             article
@@ -121,14 +126,14 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
 
         # Try to upload all these articles into ElasticSearch
         logger.info(f"Starting to index {len(recent_articles)} articles...")
-        start_index = datetime.now()        
+        start_index = datetime.now()
         try:
             for is_ok, response in helpers.streaming_bulk(
                 es,
                 recent_articles,
                 index=CONFIG.get("index", "name"),
                 raise_on_error=True,
-                timeout=CONFIG.get("elasticsearch", "timeout")
+                timeout=CONFIG.get("elasticsearch", "timeout"),
             ):
                 if not is_ok:
                     # If the indexing is not successful, log the error
@@ -150,7 +155,7 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
 
         files_indexed += 1
         articles_added += len(recent_articles)
-    
+
     total_time_taken = datetime.now() - start
     logger.info(
         f"Successfully index {files_indexed} files, adding {articles_added} articles in {total_time_taken}."

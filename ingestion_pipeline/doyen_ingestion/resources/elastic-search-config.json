@@ -65,11 +65,7 @@
         }
       },
       "references": {
-        "properties": {
-          "article_id": {
-            "type": "text"
-          }
-        }
+        "type": "text"
       }
     }
   }

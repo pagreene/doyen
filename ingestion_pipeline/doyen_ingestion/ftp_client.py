@@ -48,7 +48,7 @@ class NihFtpClient(object):
     def download_file(self, file_path: Union[Path, str], dest_file: Path = None):
         """Download a file into a file given by file_path."""
         if not dest_file:
-            dest_file = Path(".") / file_path.name
+            dest_file = Path("..") / file_path.name
 
         full_path = self.root / file_path
         logger.info(full_path)

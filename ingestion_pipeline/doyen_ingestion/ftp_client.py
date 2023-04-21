@@ -1,6 +1,6 @@
 import logging
 import zlib
-from ftplib import FTP
+import ftplib
 from io import BytesIO
 from pathlib import Path
 from contextlib import contextmanager
@@ -16,7 +16,7 @@ FTP_BLOCK_SIZE = 33554432  # Chunk size recommended by NCBI
 @contextmanager
 def ftp_connection(ftp_url: str):
     """Get an FTP connection for the given URL and login."""
-    ftp_session = FTP(ftp_url)
+    ftp_session = ftplib.FTP(ftp_url)
     ftp_session.login()
     yield ftp_session
 

@@ -7,10 +7,11 @@ from pathlib import Path
 import shutil
 
 import click
-from elasticsearch import Elasticsearch, helpers, BadRequestError
+import elasticsearch
+from elasticsearch import helpers
 from indra.literature.pubmed_client import get_metadata_from_xml_tree
 
-from ftp_client import NihFtpClient
+from doyen_ingestion.ftp_client import NihFtpClient
 
 # Define file paths relative to this location.
 HERE = Path(__file__).parent.absolute()
@@ -43,7 +44,7 @@ CONFIG.read(CONFIG_FILE)
 
 def get_es_client():
     """Get an instance of the elasticsearch client."""
-    return Elasticsearch(
+    return elasticsearch.Elasticsearch(
         CONFIG.get("elasticsearch", "host"),
         ca_certs=CONFIG.get("elasticsearch", "ca_certs"),
         basic_auth=(
@@ -69,7 +70,7 @@ def create_pubmed_paper_index():
     # Build the index.
     try:
         es.indices.create(index=index_name, body={"mappings": es_config["mappings"]})
-    except BadRequestError as err:
+    except elasticsearch.BadRequestError as err:
         logger.error("Failed to create the index.")
         logger.exception(err)
         return False

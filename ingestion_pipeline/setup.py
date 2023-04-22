@@ -5,7 +5,7 @@ setup(
     version="0.1",
     packages=find_packages(),
     include_package_data=True,
-    entry_points={"console_scripts": ["doyen-ingest = doyen_ingestion.pubmed_processor:main"]},
+    entry_points={"console_scripts": ["doyen-ingest = doyen_ingestion.pubmed_processor:fill_elasticsearch"]},
     python_requires=">=3.7",
     install_requires=[
         "click",

@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     entry_points={"console_scripts": ["doyen-ingest = doyen.pubmed_processor:main"]},
-    python_requires=">=3.9",
+    python_requires=">=3.7",
     install_requires=[
         "click",
         "elasticsearch",

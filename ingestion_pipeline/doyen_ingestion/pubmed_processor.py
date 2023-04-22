@@ -16,6 +16,11 @@ from doyen_ingestion.ftp_client import NihFtpClient
 # Define file paths relative to this location.
 HERE = Path(__file__).parent.absolute()
 CONFIG_FILE = HERE / "resources" / "config.ini"
+if not CONFIG_FILE.exists():
+    # Allow users that install this through pip or similar
+    # to locate the config file in their home directory.
+    CONFIG_FILE = Path("~/.doyen/config.ini").expanduser()
+
 CONFIG_TEMPLATE = HERE / "resources" / "config_template.ini"
 ES_INDEX_CONFIG = HERE / "resources" / "elastic-search-config.json"
 
@@ -29,6 +34,7 @@ logger = logging.getLogger("doyen_pubmed_upload")
 # Make sure the user fills out the config file.
 if not CONFIG_FILE.exists():
     logger.warning(f"No config file found. It should be at {CONFIG_FILE}.")
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(CONFIG_TEMPLATE, CONFIG_FILE)
     logger.warning(
         "Created a new config file from a template. Please "

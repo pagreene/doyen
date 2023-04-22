@@ -1,0 +1,92 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  MyHomeIp:
+    Type: String
+  AmazonLinux2Ami:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+Resources:
+  DoyenVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: '10.0.0.0/16'
+  DoyenInternetGateway:
+    Type: AWS::EC2::InternetGateway
+  DoyenVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref DoyenVPC
+      InternetGatewayId: !Ref DoyenInternetGateway
+  DoyenPrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DoyenVPC
+      CidrBlock: '10.0.0.0/24'
+  DoyenPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DoyenVPC
+      CidrBlock: '10.0.1.0/24'
+      MapPublicIpOnLaunch: 'true'
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref DoyenVPC
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: DoyenInternetGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref DoyenInternetGateway
+  DoyenPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DoyenPublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+  DoyenSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: DoyenSecurityGroup
+      GroupDescription: Allow SSH access from my home IP
+      VpcId: !Ref DoyenVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyHomeIp
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          Description: 'allow all outbound traffic'
+          IpProtocol: '-1'
+  DoyenESInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmazonLinux2Ami
+      InstanceType: t3.medium
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - !Ref DoyenSecurityGroup
+          SubnetId: !Ref DoyenPublicSubnet
+      KeyName: elasticsearch-pagreene-keypair
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 100
+            VolumeType: gp2
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          echo 'Installing Python 3.9...'
+          add-apt-repository -y ppa:deadsnakes/ppa
+          apt-get update
+          apt-get install -y python3.9
+          echo 'Installing Elasticsearch...'
+          apt-get install -y apt-transport-https
+          wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
+          echo 'deb https://artifacts.elastic.co/packages/7.x/apt stable main' | tee /etc/apt/sources.list.d/elastic-7.x.list
+          apt-get update && apt-get install -y elasticsearch
+          service elasticsearch start

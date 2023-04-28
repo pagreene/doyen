@@ -50,8 +50,16 @@ CONFIG.read(CONFIG_FILE)
 
 def get_es_client():
     """Get an instance of the elasticsearch client."""
+    verify_certs_str = CONFIG.get("elasticsearch", "verify_certs")
+    if verify_certs_str.lower() not in ("true", "false"):
+        raise ValueError(
+            f"Invalid value for verify_certs: {verify_certs_str}. "
+            f"Must be either True or False."
+        )
+    verify_certs = verify_certs_str.lower() == "true"
     return elasticsearch.Elasticsearch(
         CONFIG.get("elasticsearch", "host"),
+        verify_certs=verify_certs,
         ca_certs=CONFIG.get("elasticsearch", "ca_certs"),
         basic_auth=(
             CONFIG.get("elasticsearch", "username"),

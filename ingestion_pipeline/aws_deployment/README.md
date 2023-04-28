@@ -21,3 +21,13 @@ If there is an error, you can examine the logs using
 ```bash
 aws cloudformation describe-stack-events --stack-name doyen-es
 ```
+
+You can update the stack using the same command as above, but with `update-stack` instead of `create-stack`:
+
+```bash
+aws cloudformation update-stack \
+  --stack-name doyen-es \
+  --template-body file:///full/path/to/doyen/ingestion_pipeline/aws_deployment/template.yaml \
+  --parameters ParameterKey=MyHomeIp,ParameterValue=<your ip>
+```
+

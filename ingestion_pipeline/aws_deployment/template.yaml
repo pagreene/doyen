@@ -64,7 +64,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref AmazonLinux2Ami
-      InstanceType: t3.medium
+      InstanceType: r6a.large
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0

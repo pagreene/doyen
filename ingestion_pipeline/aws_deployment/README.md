@@ -78,6 +78,7 @@ nvme0n1                 8G
 Note the much larger volume that is not mounted or formatted. If you see that FSTYPE is xfs and that
 there is already a mount point, you're all set and can skip ahead to Configuring Docker.
 
+
 ### Formatting and mounting the EBS volume
 
 You will first need to format it as xfs:
@@ -92,6 +93,7 @@ Next, you will want to create the directory where you will mount the volume, and
 sudo mkdir /volume
 sudo mount /dev/nvme1n1 /volume
 ```
+
 
 ### Configuring Docker to use the EBS volume
 
@@ -123,6 +125,7 @@ Finally, you can start the docker daemon:
 sudo service docker start
 ```
 
+
 ## Setting up ElasticSearch
 
 You are now free to set up ElasticSearch as shown in the [ingestion README](../README.md), with a single modification:
@@ -141,6 +144,7 @@ container without losing data. You can do this by adding the following to the do
 ```bash
 ... --volume /volume/esdata:/usr/share/elasticsearch/data ...
 ```
+
 
 ## Installing the Ingestion Pipeline
 
@@ -162,11 +166,24 @@ reinstall it.
 Once it is installed, you should be able to run:
 
 ```bash
-doyen-ingestion --help
+doyen-ingest --help
 ```
 
 and get a help message without errors. You may get a message prompting you to fill out a config file in 
 `~/.doyen/config.ini`. See the [ingestion README](../README.md) for details on how to fill out this file.
+
+
+## Set up Updates
+
+You can set up regular updates of the ES content using `cron`. To do this, you will need to create a cron job
+using `crontab -e`. You will need to add the following line to the file:
+
+```bash
+0 23 * * 6 /home/ec2-user/.venvs/doyen/bin/python -m doyen-ingest -s -100 
+```
+
+where it is assumed the virtual environment is located at `/home/ec2-user/.venvs/doyen`. This will run the
+pipeline every Saturday at 11pm.
 
 
 ## A Final Note the use of AI Tools

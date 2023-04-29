@@ -51,11 +51,14 @@ docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
 Fill out the `config.ini` file in this directory, in particular updating the
 password and the location of the certificate file.
 
+We recommend that you set up a python virtual environment, as shown [here](https://docs.python.org/3/tutorial/venv.html),
+or by your preferred method. To install the package, run the following command in this directory:
+
 ````bash
 pip install .
 ````
 
-You should then be able to simply run the pubmed processor:
+Once installed, you should then be able to simply run the pubmed processor:
 ```bash
 doyen-ingest --start -100 
 ```

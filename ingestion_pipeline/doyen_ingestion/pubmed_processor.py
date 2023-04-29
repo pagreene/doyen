@@ -200,21 +200,47 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     is_flag=True,
     help="Optionally quiet the logs to only show warnings.",
 )
-def fill_elasticsearch(start: Optional[int], end: Optional[int], quiet: bool):
+@click.option(
+    "--baseline-only",
+    "-B",
+    is_flag=True,
+    help="Only index the baseline files. Note this is incompatible with the --updatefiles-only/-U flag.",
+)
+@click.option(
+    "--updatefiles-only",
+    "-U",
+    is_flag=True,
+    help="Only index the update files. Note this is incompatible with the --baseline-only/-B flag.",
+)
+def fill_elasticsearch(
+    start: Optional[int],
+    end: Optional[int],
+    quiet: bool,
+    baseline_only: bool,
+    updatefiles_only: bool,
+):
     # Set the log level.
     if quiet:
         logging.basicConfig(level=logging.WARNING)
 
-    # Get the list of baseline files
+    # Get the list of candidate files
     client = NihFtpClient("pubmed")
-    baseline_files = client.list("baseline")
-    baseline_gz_files = sorted(
-        fname for fname, _ in baseline_files if fname.endswith(".gz")
-    )
+    candidate_files = []
+    if not updatefiles_only:
+        candidate_files += sorted(
+            f"baseline/{fname}"
+            for fname, _ in client.list("baseline")
+            if fname.endswith(".gz")
+        )
+    if not baseline_only:
+        candidate_files += sorted(
+            f"updatefiles/{fname}"
+            for fname, _ in client.list("updatefiles")
+            if fname.endswith(".gz")
+        )
 
     # We are currently just playing with the 100 files at the end of the list.
-    file_paths = [f"baseline/{fname}" for fname in baseline_gz_files]
-    return index_pubmed_files(file_paths[start:end])
+    return index_pubmed_files(candidate_files[start:end])
 
 
 if __name__ == "__main__":

@@ -51,11 +51,24 @@ docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
 Fill out the `config.ini` file in this directory, in particular updating the
 password and the location of the certificate file.
 
+````bash
+pip install .
+````
+
 You should then be able to simply run the pubmed processor:
 ```bash
-python pubmed_processor.py --start -100 
+doyen-ingest --start -100 
 ```
 The index will be created, and the content uploaded. You can check the options on the processor using `--help`.
 
 Note that you will need to change the password, and update
 the `http_ca.crt` file every time to start up ElasticSearch.
+
+
+## Kibana
+
+You can use Kibana to view the content of the ElasticSearch instance. To do this, you will need to
+start Kibana, and then configure it to connect to the ElasticSearch instance.
+
+For instructions on how to set up Kibana, see [here](https://www.elastic.co/guide/en/kibana/current/docker.html).
+For instructions on how to connect Kibana to ElasticSearch, see [here](https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html).

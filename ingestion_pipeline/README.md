@@ -75,3 +75,7 @@ start Kibana, and then configure it to connect to the ElasticSearch instance.
 
 For instructions on how to set up Kibana, see [here](https://www.elastic.co/guide/en/kibana/current/docker.html).
 For instructions on how to connect Kibana to ElasticSearch, see [here](https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html).
+
+## Cloud Deployment
+
+For instructions on deploying to the cloud, see [here](./aws_deployment/README.md).

@@ -141,3 +141,29 @@ container without losing data. You can do this by adding the following to the do
 ```bash
 ... --volume /volume/esdata:/usr/share/elasticsearch/data ...
 ```
+
+<details>
+    <summary>A Note on the use of AI Tools</summary>
+
+    This section of the project made extensive use of AI tools. In particular, the following tools were used:
+        - [GitHub Copilot](https://copilot.github.com/)
+        - [ChatGPT](https://chat.openai.com/)
+    
+    ChatGPT was used on a free trial account and GitHub Copilot was used on a paid account integrated with
+    Pycharm. ChatGPT was used extensively when formulating the CloudFormation template. I used to to generate
+    chunks of the template, and then asked questions to help me fix it and fill in the gaps. GitHub Copilot offered
+    suggestions for completions in the template, both for comments and for resource definitions. The process was
+    altogether highly integrated and iterative. I would get a suggestion from ChatGPT, apply it with some completion
+    and input from GitHub Copilot, try to run the template, then start the cycle over again to refine the template
+    based on the results. Some old-fashioned googling was also used to verify the results given by ChatGPT and
+    debug some specific errors that ChatGPT and Copilot struggled with.
+
+    I found that ChatGPT was extremely valuable in this particular domain. Given the highly structured nature of
+    CloudFormation templates, it was able to generate large chunks of the template, in particular providing
+    correct boilerplate for each resource definition. The alternative method requires extensive manual work searching
+    through the AWS documentation and piecing together the template. Although not conceptually complex, every detail
+    of spelling matters, and it is easy to make a mistake. In the same way, GitHub Copilot was also extremely valuable
+    when I wanted to make minor adjustments to the template. 
+
+    My primary goal in using AI for this task was to evaluate its effectiveness and learn how to effectivley use it.
+</details>

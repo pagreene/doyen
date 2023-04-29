@@ -1,12 +1,30 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
+
+# Define parameters that will be passed in when the stack is created.
+# Each parameter is assigned using the --parameters flag when the stack is
+# created, using the format ParameterKey=ParameterValue. So for example,
+# to create a stack with the MyHomeIp parameter set to 123.4.5.6, and
+# manually set the AMI you would run:
+#  aws cloudformation create-stack --stack-name DoyenStack \
+#    --template-body file://template.yaml \
+#    --parameters ParameterKey=MyHomeIp,ParameterValue=123.4.5.6 \
+#                 ParameterKey=AmazonLinux2Ami,ParameterValue=ami-12345678
 Parameters:
   MyHomeIp:
+    Type: String
+  MyKeyPairName:
     Type: String
   AmazonLinux2Ami:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
+# Define resources that will be created when the stack is created.
 Resources:
+  # First we have to create the network infrastructure, including the VPC,
+  # subnets, and routing tables. This config creates a public and a private
+  # subnet, and adds an internet gateway on the public subnet, which is what
+  # allows instances in the public subnet access to and from the internet.
   DoyenVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -45,21 +63,38 @@ Resources:
     Properties:
       SubnetId: !Ref DoyenPublicSubnet
       RouteTableId: !Ref PublicRouteTable
+
+  # Define a security group that allows SSH access from
+  # my home IP, as well as Elasticsearch access from anywhere,
+  # and ensures all outbound traffic is allowed.
   DoyenSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: DoyenSecurityGroup
-      GroupDescription: Allow SSH access from my home IP
+      GroupDescription: Allow SSH access from my home IP, as well as Elasticsearch access from anywhere.
       VpcId: !Ref DoyenVPC
       SecurityGroupIngress:
+        # Allow SSH access from my home IP
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: !Ref MyHomeIp
+        # Allow Elasticsearch access from anywhere
+        - IpProtocol: tcp
+          FromPort: 9200
+          ToPort: 9200
+          CidrIp: '0.0.0.0/0'
       SecurityGroupEgress:
+        # Allow all outbound traffic
         - CidrIp: '0.0.0.0/0'
           Description: 'allow all outbound traffic'
           IpProtocol: '-1'
+
+  # Define an EC2 instance that will run Elasticsearch.
+  # Note that the instance is set to be r6a.large (2 vCPU, 16 GB RAM) to
+  # accommodate loading the data into Elasticsearch. In steady state, the
+  # instance can be smaller, such as an m6a.large (2 vCPU, 8 GB RAM) or even
+  # a t3.medium (2 vCPU, 4 GB RAM).
   DoyenESInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -71,7 +106,7 @@ Resources:
           GroupSet:
             - !Ref DoyenSecurityGroup
           SubnetId: !Ref DoyenPublicSubnet
-      KeyName: elasticsearch-pagreene-keypair
+      KeyName: !Ref MyKeyPairName
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:

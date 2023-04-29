@@ -77,16 +77,3 @@ Resources:
           Ebs:
             VolumeSize: 100
             VolumeType: gp2
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          echo 'Installing Python 3.9...'
-          add-apt-repository -y ppa:deadsnakes/ppa
-          apt-get update
-          apt-get install -y python3.9
-          echo 'Installing Elasticsearch...'
-          apt-get install -y apt-transport-https
-          wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
-          echo 'deb https://artifacts.elastic.co/packages/7.x/apt stable main' | tee /etc/apt/sources.list.d/elastic-7.x.list
-          apt-get update && apt-get install -y elasticsearch
-          service elasticsearch start

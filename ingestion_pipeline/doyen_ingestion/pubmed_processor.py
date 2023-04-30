@@ -238,6 +238,14 @@ def doyen_ingest_cli(
     min_year: int,
     no_refresh_index: bool,
 ):
+    """This CLI helps manage building indexes of the PubMed baseline and update files into ElasticSearch.
+
+    The CLI will manage the download and decompression of the files from the NIH FTP server, parse the XML,
+    and index the articles into ElasticSearch.
+
+    It is assumed you have a running instance of ElasticSearch, and the appropriate values have been entered
+    into the config file.
+    """
     # Set the log level.
     if quiet:
         logging.basicConfig(level=logging.WARNING)

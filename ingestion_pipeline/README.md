@@ -48,8 +48,9 @@ docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
 
 ### Fill ElasticSearch
 
-Fill out the `config.ini` file in this directory, in particular updating the
-password and the location of the certificate file.
+Fill out the `config.ini` file in `~/.doyen/config.ini`, in particular updating the
+password and the location of the certificate file. We recommend placing the certificate in the same
+directory as the config file, though be sure to give the absolute path in the config file.
 
 We recommend that you set up a python virtual environment, as shown [here](https://docs.python.org/3/tutorial/venv.html),
 or by your preferred method. To install the package, run the following command in this directory:

@@ -23,10 +23,22 @@
       "authors": {
         "properties": {
           "last_name": {
-            "type": "text"
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
           },
           "first_name": {
-            "type": "text"
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
           },
           "identifiers": {
             "type": "text"
@@ -34,6 +46,9 @@
           "affiliations": {
             "properties": {
               "affiliation": {
+                "type": "text"
+              },
+              "identifiers": {
                 "type": "text"
               }
             }

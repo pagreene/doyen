@@ -2,13 +2,13 @@ from setuptools import find_packages, setup
 
 setup(
     name="doyen_ingestion",
-    version="1.0.1",
+    version="1.0.2",
     packages=find_packages(),
     include_package_data=True,
     package_data={"doyen_ingestion": ["resources/*"]},
     entry_points={
         "console_scripts": [
-            "doyen-ingest = doyen_ingestion.pubmed_processor:fill_elasticsearch"
+            "doyen-ingest = doyen_ingestion.pubmed_processor:doyen_ingest_cli",
         ]
     },
     python_requires=">=3.7",

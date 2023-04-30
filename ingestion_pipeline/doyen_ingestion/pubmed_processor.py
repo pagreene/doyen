@@ -92,7 +92,9 @@ def create_pubmed_paper_index():
     return True
 
 
-def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
+def index_pubmed_files(
+    file_paths: List[str], min_year=None, refresh_index: bool = True
+):
     """Indexes all the gz files in the provided list_of_files parameter"""
     start = datetime.now()
 
@@ -123,7 +125,7 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
         recent_articles = [
             article
             for article in articles_by_pmid.values()
-            if article["publication_date"]["year"] > 2017
+            if article["publication_date"]["year"] > min_year
         ]
         xml_tree.clear()
 
@@ -212,12 +214,29 @@ def index_pubmed_files(file_paths: List[str], refresh_index: bool = True):
     is_flag=True,
     help="Only index the update files. Note this is incompatible with the --baseline-only/-B flag.",
 )
-def fill_elasticsearch(
+@click.option(
+    "--min-year",
+    "-y",
+    default=-5,
+    help=(
+        "The minimum year of articles to index. Defaults to 5 years ago. Negative values are measured "
+        "back from the current year."
+    ),
+    type=int,
+)
+@click.option(
+    "--no-refresh-index",
+    is_flag=True,
+    help="Optionally do not refresh the index before indexing the files.",
+)
+def doyen_ingest_cli(
     start: Optional[int],
     end: Optional[int],
     quiet: bool,
     baseline_only: bool,
     updatefiles_only: bool,
+    min_year: int,
+    no_refresh_index: bool,
 ):
     # Set the log level.
     if quiet:
@@ -239,9 +258,27 @@ def fill_elasticsearch(
             if fname.endswith(".gz")
         )
 
+    # If the year is negative, we need to get the year relative to the current year.
+    if min_year < 0:
+        min_year = datetime.now().year + min_year
+
+    # Select the sub-list of files to index.
+    files_to_index = candidate_files[start:end]
+    num_baseline_files = len([f for f in files_to_index if f.startswith("baseline")])
+    num_update_files = len([f for f in files_to_index if f.startswith("updatefiles")])
+    click.echo(
+        f"Indexing {len(files_to_index)} files ({num_baseline_files} baseline, {num_update_files} updatefiles),"
+        f" going back as far as {min_year}."
+    )
+    click.echo(
+        f"The index {'will *NOT*' if no_refresh_index else '*WILL*'} be refreshed before indexing the files."
+    )
+
     # We are currently just playing with the 100 files at the end of the list.
-    return index_pubmed_files(candidate_files[start:end])
+    return index_pubmed_files(
+        files_to_index, min_year=min_year, refresh_index=not no_refresh_index
+    )
 
 
 if __name__ == "__main__":
-    fill_elasticsearch()
+    doyen_ingest_cli()

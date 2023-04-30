@@ -5,7 +5,7 @@ from click.testing import CliRunner
 from elasticsearch import Elasticsearch
 from pytest_mock import MockFixture
 
-from doyen_ingestion.pubmed_processor import CONFIG, fill_elasticsearch
+from doyen_ingestion.pubmed_processor import CONFIG, doyen_ingest_cli
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ def runner():
 
 
 def test_upload(es_mock, ftp_mock, runner):
-    result = runner.invoke(fill_elasticsearch)
+    result = runner.invoke(doyen_ingest_cli)
     assert result.exit_code == 0, result.return_value
     assert ftp_mock.mlsd.called
     assert ftp_mock.retrbinary.called

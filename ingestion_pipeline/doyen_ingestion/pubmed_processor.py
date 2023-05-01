@@ -93,7 +93,10 @@ def create_pubmed_paper_index():
 
 
 def index_pubmed_files(
-    file_paths: List[str], min_year=None, refresh_index: bool = True
+    file_paths: List[str],
+    min_year=None,
+    refresh_index: bool = True,
+    require_pub_year=False,
 ):
     """Indexes all the gz files in the provided list_of_files parameter"""
     start = datetime.now()
@@ -125,7 +128,8 @@ def index_pubmed_files(
         recent_articles = [
             article
             for article in articles_by_pmid.values()
-            if article["publication_date"]["year"] > min_year
+            if (not require_pub_year or article["publication_date"]["year"])
+            or article["publication_date"]["year"] > min_year
         ]
         xml_tree.clear()
 
@@ -229,6 +233,11 @@ def index_pubmed_files(
     is_flag=True,
     help="Optionally do not refresh the index before indexing the files.",
 )
+@click.option(
+    "--require-pub-year",
+    is_flag=True,
+    help="Optionally require that the publication year be present in the XML file.",
+)
 def doyen_ingest_cli(
     start: Optional[int],
     end: Optional[int],
@@ -237,6 +246,7 @@ def doyen_ingest_cli(
     updatefiles_only: bool,
     min_year: int,
     no_refresh_index: bool,
+    require_pub_year: bool,
 ):
     """This CLI helps manage building indexes of the PubMed baseline and update files into ElasticSearch.
 
@@ -284,7 +294,10 @@ def doyen_ingest_cli(
 
     # We are currently just playing with the 100 files at the end of the list.
     return index_pubmed_files(
-        files_to_index, min_year=min_year, refresh_index=not no_refresh_index
+        files_to_index,
+        min_year=min_year,
+        refresh_index=not no_refresh_index,
+        require_pub_year=require_pub_year,
     )
 
 

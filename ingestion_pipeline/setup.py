@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="doyen_ingestion",
-    version="1.0.4",
+    version="1.0.5",
     packages=find_packages(),
     include_package_data=True,
     package_data={"doyen_ingestion": ["resources/*"]},

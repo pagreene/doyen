@@ -65,8 +65,9 @@ class Search:
     This example assumes you are in an `ipython --pylab` session:
 
     >>> search = Search("COVID-19", "breast cancer")
-    >>> for graph in search.iter_subgraphs():
-    >>>     search.plot_subgraph(graph)
+    >>> fig, axes = subplots(3, 4)
+    >>> for ax, graph in zip(axes.flatten(), search.iter_subgraphs()):
+    >>>     search.plot_subgraph(graph, ax)
 
     Parameters
     ----------

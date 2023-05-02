@@ -8,7 +8,7 @@ uses it to rapidly find and rank experts with specific expertise.
 
 First, you will want to ingest the data from the [PubMed FTP server](https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/).
 This involves setting up an ElasticSearch instance, and then running the ingestion pipeline. You can find
-the instructions for setting up ElasticSearch [here](./ingestion_pipeline/README.md).
+the instructions for setting up ElasticSearch in the [ingestion pipeline sub-package](ingestion_pipeline).
 
 ## Next you will want to set up the REST API 
 
@@ -18,3 +18,11 @@ TBD
 
 The front end client is implemented in another repository, which you can
 find [here](https://github.com/DoyenTeam/doyenclient).
+
+
+## Analysis and Experimentation
+
+This repo also includes the beginnings of a [toolkit for analyzing the results you can get
+from ElasticSearch](analysis). The idea is to be able to test queries in bulk, gather statistics, examine
+graphs, and so on. Using these tools, you can develop better sorting and ranking algorithms for the
+REST API.

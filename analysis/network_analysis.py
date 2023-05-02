@@ -1,19 +1,17 @@
 import logging
 from datetime import datetime
-from typing import List, Any, Tuple, Dict
+from typing import Any, List
 
 import gilda
+import networkx as nx
+from elasticsearch import logger as es_logger
+from networkx.algorithms.components import connected_components
 from pydantic import BaseModel
 
-from elasticsearch import logger as es_logger
-from ingestion_pipeline.pubmed_processor import get_es_client
-import networkx as nx
-from networkx.algorithms.components import connected_components
-
+from doyen_ingestion.pubmed_processor import get_es_client
 
 logging.basicConfig(
-    level=logging.WARNING,
-    format=f"[%(asctime)s] %(name)s %(levelname)s - %(message)s"
+    level=logging.WARNING, format=f"[%(asctime)s] %(name)s %(levelname)s - %(message)s"
 )
 
 # Set the logging level of the elasticsearch module to WARNING
@@ -21,11 +19,15 @@ es_logger.setLevel(logging.WARNING)
 
 
 class Affiliation(BaseModel):
+    """An affiliation with a name and list of identifiers."""
+
     name: str
     identifiers: List[Any]
 
 
 class Author(BaseModel):
+    """An author with a first name, last name, and list of affiliations."""
+
     first_name: str
     last_name: str
     initials: str | None
@@ -44,6 +46,8 @@ class Author(BaseModel):
 
 
 class Paper(BaseModel):
+    """A paper with a PMID, title, authors, and MeSH annotations."""
+
     pmid: str
     title: str
     authors: List[Author] = None
@@ -55,8 +59,31 @@ class Paper(BaseModel):
 
 
 class Search:
-    def __init__(self, *search_terms: str, max_papers=100):
+    """Search for papers and authors matching the given terms.
+
+    For example, you could search for papers containing "COVID-19" and "breast cancer".
+    This example assumes you are in an `ipython --pylab` session:
+
+    >>> search = Search("COVID-19", "breast cancer")
+    >>> for graph in search.iter_subgraphs():
+    >>>     search.plot_subgraph(graph)
+
+    Parameters
+    ----------
+    *search_terms : Tuple[str]
+        Any number of search terms used to select relevant content. The terms will be
+        converted to MeSH terms where possible, if `ground_terms` is True.
+    max_papers : int
+        The maximum number of papers to return. Defaults to 100.
+    ground_terms : bool
+        If True, convert the search terms to MeSH terms where possible. Otherwise, search
+        for the terms directly. Defaults to True. NOTE: Mapping to mesh terms can be a
+        slow process, so setting this to False can speed up the search process considerably.
+    """
+
+    def __init__(self, *search_terms: str, max_papers=100, ground_terms=True):
         self.search_terms = search_terms
+        self.ground_terms = ground_terms
         self.authors = None
         self.papers = None
         self.graph = None
@@ -70,9 +97,9 @@ class Search:
         start_grounding = datetime.now()
         match_query_terms = []
         for term in self.search_terms:
-            scored_matches = gilda.ground(term, namespaces=["MESH"])
-
-            if scored_matches:
+            if self.ground_terms and (
+                scored_matches := gilda.ground(term, namespaces=["MESH"])
+            ):
                 match_query_terms.append(
                     {"match": {"mesh_annotations.mesh": scored_matches[0].term.id}}
                 )
@@ -134,6 +161,8 @@ class Search:
             yield self.graph.subgraph(subgraph)
 
     def plot_subgraph(self, graph, ax):
+        """Plot the given subgraph."""
+
         pos = nx.spring_layout(graph, k=0.5)
         author_nodes = [a for a in graph.nodes if a in self.authors]
         nx.draw_networkx_nodes(
@@ -141,7 +170,7 @@ class Search:
             pos,
             nodelist=author_nodes,
             node_color="tab:red",
-            node_size=[100*len(self.authors[a].papers) for a in author_nodes],
+            node_size=[100 * len(self.authors[a].papers) for a in author_nodes],
             ax=ax,
         )
         paper_nodes = [p for p in graph.nodes if p in self.papers]
@@ -150,7 +179,7 @@ class Search:
             pos,
             nodelist=paper_nodes,
             node_color="tab:blue",
-            node_size=[500*self.papers[p] for p in paper_nodes],
+            node_size=[500 * self.papers[p] for p in paper_nodes],
             ax=ax,
         )
         nx.draw_networkx_edges(graph, pos, ax=ax)

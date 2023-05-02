@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="doyen_ingestion",
-    version="1.0.3",
+    version="1.0.4",
     packages=find_packages(),
     include_package_data=True,
     package_data={"doyen_ingestion": ["resources/*"]},
@@ -15,7 +15,7 @@ setup(
     install_requires=[
         "click",
         "elasticsearch",
-        "indra @ https://github.com/pagreene/indra/archive/get-citations.zip",
+        "indra @ https://github.com/sorgerlab/indra/archive/master.zip",
     ],
     extras_require={"dev": ["pytest", "black", "pytest-mock"]},
     classifiers=[

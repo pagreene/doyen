@@ -19,9 +19,9 @@ aws cloudformation create-stack \
   --parameters ParameterKey=MyHomeIp,ParameterValue=<your ip> \
                ParameterKey=MyKeyPairName,ParameterValue=<your key pair name>
 ```
-Note that you have to give your local IP address. This will (at least initially) restrict access to the EC2
-instance to your home network. Similarly, give the name of an existing EC2 key pair that you have access to. This
-will set up ssh credentials for the EC2 instance.
+Note that you have to give your local IP address, including the cidr block (e.g. 123.45.67.8/32). This will (at 
+least initially) restrict access to the EC2 instance to your home network. Similarly, give the name of an existing EC2
+key pair that you have access to. This will set up ssh credentials for the EC2 instance.
 
 You can monitor the progress of the deployment using
 
@@ -41,7 +41,8 @@ You can update the stack using the same command as above, but with `update-stack
 aws cloudformation update-stack \
   --stack-name doyen-es \
   --template-body file:///full/path/to/doyen/ingestion_pipeline/aws_deployment/template.yaml \
-  --parameters ParameterKey=MyHomeIp,ParameterValue=<your ip>
+  --parameters ParameterKey=MyHomeIp,ParameterValue=<your ip> \
+               ParameterKey=MyKeyPairName,ParameterValue=<your key pair name>
 ```
 
 ## Setting up Docker

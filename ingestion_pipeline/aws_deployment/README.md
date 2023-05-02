@@ -180,11 +180,13 @@ You can set up regular updates of the ES content using `cron`. To do this, you w
 using `crontab -e`. You will need to add the following line to the file:
 
 ```bash
-0 23 * * 6 /home/ec2-user/.venvs/doyen/bin/python -m doyen-ingest -s -100 
+0 23 * * 6 /home/ec2-user/.venvs/doyen/bin/python -m doyen_ingestion.pubmed_processor -s -365 -y -10 
 ```
 
 where it is assumed the virtual environment is located at `/home/ec2-user/.venvs/doyen`. This will run the
-pipeline every Saturday at 11pm.
+pipeline every Saturday at 11pm, rebuilding the index from the latest 365 files, including content up to 10
+years old. Note that 365 is not a particularly special number, but was rather based on the fact that at the
+time of recording there were 165 update files.
 
 
 ## A Final Note the use of AI Tools

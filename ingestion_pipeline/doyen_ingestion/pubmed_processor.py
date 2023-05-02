@@ -156,7 +156,7 @@ def index_pubmed_files(
                 recent_articles,
                 index=CONFIG.get("index", "name"),
                 raise_on_error=True,
-                request_timeout=CONFIG.get("elasticsearch", "timeout"),
+                request_timeout=int(CONFIG.get("elasticsearch", "timeout")),
             ):
                 if not is_ok:
                     # If the indexing is not successful, log the error
